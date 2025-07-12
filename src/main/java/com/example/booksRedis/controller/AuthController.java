@@ -3,6 +3,7 @@ package com.example.booksRedis.controller;
 
 import com.example.booksRedis.model.User;
 import com.example.booksRedis.repo.UserRepo;
+import com.example.booksRedis.service.SessionService;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -21,6 +22,7 @@ public class AuthController {
     private final AuthenticationManager authManager;
     private final PasswordEncoder encoder;
     private final UserRepo userRepo;
+    private final SessionService sessionService;
 
 
 
@@ -30,9 +32,24 @@ public class AuthController {
         Authentication auth = authManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.getUsername(), request.getPassword())
         );
+
+        // сохраняем авторизацию в SecurityContext
         SecurityContextHolder.getContext().setAuthentication(auth);
+
+        // сохраняем SecurityContext в сессию вручную
+        session.setAttribute("SPRING_SECURITY_CONTEXT", SecurityContextHolder.getContext());
+
         return ResponseEntity.ok("Logged in. Session ID: " + session.getId());
     }
+
+
+    @GetMapping("/debug")
+    public String whoAmI() {
+        var auth = SecurityContextHolder.getContext().getAuthentication();
+        return "User: " + auth.getName() + " | Roles: " + auth.getAuthorities();
+    }
+
+
 
 
     @PostMapping("/register")

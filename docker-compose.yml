@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  # Сервис вашего Spring Boot приложения
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: books-redis-app
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+      - redis
+    environment:
+      # Настройки для подключения к PostgreSQL
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/booksdb
+      - SPRING_DATASOURCE_USERNAME=user
+      - SPRING_DATASOURCE_PASSWORD=password
+      # Настройки для подключения к Redis
+      - SPRING_DATA_REDIS_HOST=redis
+      - SPRING_DATA_REDIS_PORT=6379
+      # Говорим Spring Boot ждать, пока база данных не будет готова
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+
+  # Сервис базы данных PostgreSQL
+  db:
+    image: postgres:14-alpine
+    container_name: postgres-db
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_DB=booksdb
+      - POSTGRES_USER=user
+      - POSTGRES_PASSWORD=password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  # Сервис кэша Redis
+  redis:
+    image: redis:6.2-alpine
+    container_name: redis-cache
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+
+volumes:
+  postgres_data:
+  redis_data:
