@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: bookshop-app
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: bookshop-app
+  template:
+    metadata:
+      labels:
+        app: bookshop-app
+    spec:
+      containers:
+        - name: app
+          image: bakr458/bookshop-app:latest
+          ports:
+            - containerPort: 8003
+          env:
+            - name: SPRING_REDIS_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: redis-config
+                  key: REDIS_HOST
+            - name: SPRING_REDIS_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: redis-config
+                  key: REDIS_PORT
+            - name: SPRING_REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: redis-secret
+                  key: REDIS_PASSWORD
+            - name: SPRING_DATASOURCE_URL
+              value: jdbc:postgresql://postgres:5432/bookdb
+            - name: SPRING_DATASOURCE_USERNAME
+              valueFrom:
+                configMapKeyRef:
+                  name: postgres-config
+                  key: POSTGRES_USER
+            - name: SPRING_DATASOURCE_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgres-secret
+                  key: POSTGRES_PASSWORD

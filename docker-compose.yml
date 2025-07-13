@@ -3,12 +3,13 @@ version: '3.8'
 services:
   # Сервис вашего Spring Boot приложения
   app:
+    image: bakr458/kuber-bookapp  # <-- твой логин и имя образа
     build:
-      context: .
+      context: ..
       dockerfile: Dockerfile
     container_name: books-redis-app
     ports:
-      - "8080:8080"
+      - "8003:8003"
     depends_on:
       - db
       - redis
